@@ -37,53 +37,104 @@ public class GzipModule extends ReactContextBaseJavaModule {
   }
 
   /**
-   * Decompress the bytes.
+   * Decompress from base64 to string.
    */
   @ReactMethod
   public void inflate(@NonNull final String data, @NonNull final Promise promise) {
     try {
       final byte[] inputBytes = Base64.decode(data, Base64.DEFAULT);
-      promise.resolve(decompress(inputBytes));
+      final byte[] outputBytes = decompress(inputBytes);
+      final String outputString = new String(outputBytes, "UTF-8");
+
+      promise.resolve(outputString);
     } catch (final Throwable ex) {
       promise.reject(ER_FAILURE, ex);
     }
   }
 
   /**
-   * Compress bytes.
+   * Compress string to base64.
    */
   @ReactMethod
   public void deflate(@NonNull final String data, @NonNull final Promise promise) {
     try {
-      promise.resolve(Base64.encodeToString(compress(data), Base64.NO_WRAP));
+      final byte[] inputBytes = data.getBytes("UTF-8");
+      final byte[] outputBytes = compress(inputBytes);
+      final String outputString = Base64.encodeToString(outputBytes, Base64.NO_WRAP);
+
+      promise.resolve(outputString);
     } catch (final Throwable ex) {
       promise.reject(ER_FAILURE, ex);
     }
   }
 
-  public static byte[] compress(String string) throws IOException {
-    ByteArrayOutputStream os = new ByteArrayOutputStream(string.length());
+  /**
+   * Decompress from base64 to base64.
+   */
+  @ReactMethod
+  public void inflateBase64(@NonNull final String data, @NonNull final Promise promise) {
+    try {
+      final byte[] inputBytes = Base64.decode(data, Base64.DEFAULT);
+      final byte[] outputBytes = decompress(inputBytes);
+      final String outputString = Base64.encodeToString(outputBytes, Base64.NO_WRAP);
+
+      promise.resolve(outputString);
+    } catch (final Throwable ex) {
+      promise.reject(ER_FAILURE, ex);
+    }
+  }
+
+  /**
+   * Compress base64 to base64.
+   */
+  @ReactMethod
+  public void deflateBase64(@NonNull final String data, @NonNull final Promise promise) {
+    try {
+      final byte[] inputBytes = Base64.decode(data, Base64.DEFAULT);
+      final byte[] outputBytes = compress(inputBytes);
+      final String outputString = Base64.encodeToString(outputBytes, Base64.NO_WRAP);
+
+      promise.resolve(outputString);
+    } catch (final Throwable ex) {
+      promise.reject(ER_FAILURE, ex);
+    }
+  }
+
+  /*
+   * Compress
+   */
+  public static byte[] compressBytes(byte[] data) throws IOException {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
     GZIPOutputStream gos = new GZIPOutputStream(os);
-    gos.write(string.getBytes());
+
+    gos.write(data);
     gos.close();
+
     byte[] compressed = os.toByteArray();
+
     os.close();
+
     return compressed;
   }
 
-  public static String decompress(byte[] compressed) throws IOException {
-    final int BUFFER_SIZE = 32;
+  /*
+   * Decompress
+   */
+  public static byte[] decompressBytes(byte[] compressed) throws IOException {
     ByteArrayInputStream is = new ByteArrayInputStream(compressed);
-    GZIPInputStream gis = new GZIPInputStream(is, BUFFER_SIZE);
-    StringBuilder string = new StringBuilder();
-    byte[] data = new byte[BUFFER_SIZE];
-    int bytesRead;
-    while ((bytesRead = gis.read(data)) != -1) {
-      string.append(new String(data, 0, bytesRead));
+    GZIPInputStream gis = new GZIPInputStream(is);
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+    byte[] buffer = new byte[1024];
+    int len;
+
+    while ((len = gis.read(buffer)) != -1) {
+      os.write(buffer, 0, len);
     }
+
     gis.close();
     is.close();
-    return string.toString();
-  }
 
+    return os.toByteArray();
+  }
 }
