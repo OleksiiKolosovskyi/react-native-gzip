@@ -27,21 +27,21 @@ RCT_REMAP_METHOD(deflate,
 
 // Decompresses base64 encoded base64 string
 RCT_REMAP_METHOD(inflateBase64,
-                 base64: (NSString *)base64
+                 compressedBase64: (NSString *)compressedBase64
                  withResolver: (RCTPromiseResolveBlock)resolve
                  withRejecter: (RCTPromiseRejectBlock)reject)
 {
-  NSData * _data = [NSData dataWithBase64String: base64];
+  NSData * _data = [NSData dataWithBase64String: compressedBase64];
   resolve([[_data gunzippedData] base64String]);
 }
 
 // Compresses base64 string to base64 encoded string
 RCT_REMAP_METHOD(deflateBase64,
-                 base64: (NSString *)base64
+                 plainBase64: (NSString *)plainBase64
                  withResolver: (RCTPromiseResolveBlock)resolve
                  withRejecter: (RCTPromiseRejectBlock)reject)
 {
-  NSData * _data = [NSData dataWithBase64String: base64];
+  NSData * _data = [NSData dataWithBase64String: plainBase64];
   resolve([[NSString alloc] initWithData: [_data gzippedData] encoding: NSUTF8StringEncoding]);
 }
 
