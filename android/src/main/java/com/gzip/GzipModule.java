@@ -103,7 +103,7 @@ public class GzipModule extends ReactContextBaseJavaModule {
   /*
    * Compress
    */
-  public static byte[] compressBytes(byte[] data) throws IOException {
+  public static byte[] compress(byte[] data) throws IOException {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     GZIPOutputStream gos = new GZIPOutputStream(os);
 
@@ -120,7 +120,7 @@ public class GzipModule extends ReactContextBaseJavaModule {
   /*
    * Decompress
    */
-  public static byte[] decompressBytes(byte[] compressed) throws IOException {
+  public static byte[] decompress(byte[] compressed) throws IOException {
     ByteArrayInputStream is = new ByteArrayInputStream(compressed);
     GZIPInputStream gis = new GZIPInputStream(is);
     ByteArrayOutputStream os = new ByteArrayOutputStream();
